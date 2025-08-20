@@ -15,11 +15,11 @@ interface ZoomCredentials {
 function App() {
   // State for zoom credentials
   const [zoomCredentials, setZoomCredentials] = useState<ZoomCredentials | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [, setError] = useState<string | null>(null);
+  const [, setLoading] = useState(false);
 
   // Change this endpoint to use the sample signature node server
-  const authEndpoint = "http://localhost:8000/api/zoom/public-signature";
+  const authEndpoint = "http://admin.eoe.lk/api/zoom/public-signature";
   const sdkKey = "7HVQQGOjR_2qq6vJvdWw"; // Your SDK key
 
   // Will be set from fetched credentials
@@ -31,14 +31,14 @@ function App() {
   const userEmail = "";
   const registrantToken = "";
   const zakToken = "";
-  const leaveUrl = "http://localhost:5173";
+  const leaveUrl = "https://zoom-new-jvfr.vercel.app/";
 
   // Fetch Zoom credentials by ID
   const fetchZoomCredentials = async (id: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:8000/api/zoom-credentials/${id}`);
+      const response = await fetch(`http://admin.eoe.lk/api/zoom-credentials/${id}`);
       const data = await response.json();
 
       if (data.status && data.data) {
