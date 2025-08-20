@@ -19,7 +19,7 @@ function App() {
   const [, setLoading] = useState(false);
 
   // Change this endpoint to use the sample signature node server
-  const authEndpoint = "http://admin.eoe.lk/api/zoom/public-signature";
+  const authEndpoint = "https://admin.eoe.lk/api/zoom/public-signature";
   const sdkKey = "7HVQQGOjR_2qq6vJvdWw"; // Your SDK key
 
   // Will be set from fetched credentials
@@ -38,7 +38,7 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://admin.eoe.lk/api/zoom-credentials/${id}`);
+      const response = await fetch(`https://admin.eoe.lk/api/zoom-credentials/${id}`);
       const data = await response.json();
 
       if (data.status && data.data) {
