@@ -1,19 +1,69 @@
 import "./App.css";
 import { ZoomMtg } from "@zoom/meetingsdk";
+import { useState, useEffect } from "react";
 
+// Initialize Zoom SDK
 ZoomMtg.preLoadWasm();
 ZoomMtg.prepareWebSDK();
 
+// Interface for Zoom credentials
+interface ZoomCredentials {
+  zoom_id: string;
+  zoom_password: string;
+}
+
 function App() {
-  const authEndpoint = ""; // http://localhost:4000
-  const meetingNumber = "";
-  const passWord = "";
+  // State for zoom credentials
+  const [zoomCredentials, setZoomCredentials] = useState<ZoomCredentials | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Change this endpoint to use the sample signature node server
+  const authEndpoint = "http://localhost:8000/api/zoom/public-signature";
+  const sdkKey = "7HVQQGOjR_2qq6vJvdWw"; // Your SDK key
+
+  // Will be set from fetched credentials
+  const [meetingNumber, setMeetingNumber] = useState("");
+
+  // Default values
   const role = 0;
-  const userName = "React";
+  const userName = "Test";
   const userEmail = "";
   const registrantToken = "";
   const zakToken = "";
   const leaveUrl = "http://localhost:5173";
+
+  // Fetch Zoom credentials by ID
+  const fetchZoomCredentials = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`http://localhost:8000/api/zoom-credentials/${id}`);
+      const data = await response.json();
+
+      if (data.status && data.data) {
+        setZoomCredentials(data.data);
+        setMeetingNumber(data.data.zoom_id);
+      } else {
+        setError(data.message || 'Failed to fetch zoom credentials');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch zoom credentials');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Effect to fetch credentials when ID is available
+  useEffect(() => {
+    // Get ID from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    if (id) {
+      fetchZoomCredentials(id);
+    }
+  }, []);
 
   const getSignature = async () => {
     try {
@@ -23,7 +73,7 @@ function App() {
         body: JSON.stringify({
           meetingNumber: meetingNumber,
           role: role,
-          videoWebRtcMode: 1,
+          sdkKey: sdkKey  // Add sdkKey parameter
         }),
       });
       const res = await req.json();
@@ -43,11 +93,16 @@ function App() {
       leaveOnPageUnload: true,
       success: (success: unknown) => {
         console.log(success);
-        // can this be async?
+
+        if (!zoomCredentials) {
+          console.error('No zoom credentials available');
+          return;
+        }
+
         ZoomMtg.join({
           signature: signature,
           meetingNumber: meetingNumber,
-          passWord: passWord,
+          passWord: zoomCredentials.zoom_password,
           userName: userName,
           userEmail: userEmail,
           tk: registrantToken,
